@@ -24,15 +24,62 @@ class GameSprite(sprite.Sprite):
     def reset(self):
         window.blit(self.image, (self.rect.x, self.rect.y))
 
-player = GameSprite("cot.jpg", 5, win_height - 80, 4)
-enemy = GameSprite("necot.jpg", win_width - 80, 280, 3)
+class Player(GameSprite):
+    def update(self):
+        keys = key.get_pressed()
+        if keys[K_LEFT] and self.rect.x > 3:
+            self.rect.x -= self.speed
+        if keys[K_RIGHT] and self.rect.x < win_width - 70:
+            self.rect.x += self.speed
+        if keys[K_DOWN] and self.rect.y < win_height - 70:
+            self.rect.y += self.speed
+        if keys[K_UP] and self.rect.y < 3:
+            self.rect.y -= self.speed
+
+class Enemy(GameSprite):
+    direction = 'left'
+    def update(self):
+        if self.rect.x <= 470:
+            self.direction = 'right'
+        if self.rect.x >= win_width - 85:
+            self.direction = 'left'
+        if self.direction == 'left':
+            self.rect.x -= self.speed
+        else:
+            self.rect.x += self.speed
+
+class Wall(sprite.Sprite):
+    def __init__(self, color_1, color_2, color_3, wall_x, wall_y, wall_width,
+                 wall_height):
+        super().__init()
+        self.color_1 = color_1
+        self.color_2 = color_2
+        self.color_3 = color_3
+        self.wall_width = wall_width
+        self.wall_height = wall_height
+        self.image = Surface((self.wall_width, self.wall_height))
+        self.image.fill((color_1, color_2, color_3))
+        self.rect = self.image.get_rect()
+        self.rect.x = wall.x
+        self.rect.y = wall.y
+    def draw_wall(self):
+        window.blit(self.image, (self.rect.x, self.rect.y))
+w1 = Wall(204, 102, 0,  100, 20, 450, 10)
+
+
+player = Player("cot-transformed.png", 5, win_height - 80, 4)
+enemy = GameSprite("necot-transformed.png", win_width - 80, 280, 3)
+goal = GameSprite("крысь-transformed.png", 400, 420, 0)
 
 while game:
     for e in event.get():
         if e.type == QUIT:
             game = False
     window.blit(background, (0, 0))
+    player.update()
     player.reset()
     enemy.reset()
+    goal.reset()
+    w1.draw_wall()
     display.update()
     clock.tick(FPS)
